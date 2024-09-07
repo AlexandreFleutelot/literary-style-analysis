@@ -1,5 +1,6 @@
 # Python
 __pycache__/
+literary_style_analysis.egg-info/
 
 # Virtual Environment
 venv/
