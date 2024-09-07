@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+
+# Virtual Environment
+venv/
+
+# IDEs and Editors
+.vscode/
+
+# Logs
+logs/
+*.log
+
+# Model checkpoints and saved models
+models/
+*.pth
+
+# Data
+data/
+*.csv
+*.json
+*.pt
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Jupyter Notebook
+.ipynb_checkpoints
