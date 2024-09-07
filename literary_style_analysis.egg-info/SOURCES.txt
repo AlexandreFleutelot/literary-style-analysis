@@ -1,7 +1,0 @@
-README.md
-setup.py
-literary_style_analysis.egg-info/PKG-INFO
-literary_style_analysis.egg-info/SOURCES.txt
-literary_style_analysis.egg-info/dependency_links.txt
-literary_style_analysis.egg-info/requires.txt
-literary_style_analysis.egg-info/top_level.txt
