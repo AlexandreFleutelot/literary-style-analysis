@@ -8,15 +8,14 @@ class Config:
     # "prajjwal1/bert-mini": 4 layers / 11.3M parameters / out 256 dimensions
     # "prajjwal1/bert-small": 4 layers / 29.1M parameters / out 512 dimensions
     # "bert-base-uncased": 12 layers / 110M parameters / out 768 dimensions
-
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    MODEL_NAME = "prajjwal1/bert-mini"  
+    MODEL_NAME = "prajjwal1/bert-small"  
     NUM_FROZEN_LAYERS = 0
     LEARNING_RATE = 2e-5
-    NUM_EPOCHS = 15
-    MARGIN = 0.2
+    NUM_EPOCHS = 5
+    MARGIN = 0.5
     BATCH_SIZE = 32
-    MAX_LENGTH = 256
+    MAX_LENGTH = 512
     TEST_SIZE = 0.2
 
     # Memory management

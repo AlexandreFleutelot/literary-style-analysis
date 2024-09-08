@@ -87,7 +87,8 @@ def main():
     dataset = LiteraryStyleDataset(Config.TOKENIZED_TRIPLETS_FILE, tokenized=True)
 
     if args.random:
-        display_random_triplet_similarities(model, dataset, tokenizer, device)
+        for _ in range(5):
+            display_random_triplet_similarities(model, dataset, tokenizer, device)
     elif args.text1 and args.text2:
         compare_custom_texts(model, args.text1, args.text2, tokenizer, device)
     else:

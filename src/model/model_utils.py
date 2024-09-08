@@ -20,7 +20,9 @@ def load_model(model, optimizer, path):
     Load the model state, optimizer state, epoch, and loss.
     """
     if os.path.exists(path):
-        checkpoint = torch.load(path)
+        # Add map_location to handle CPU/GPU transitions
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        checkpoint = torch.load(path, map_location=device)
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         epoch = checkpoint['epoch']

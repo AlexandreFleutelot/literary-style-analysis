@@ -4,7 +4,8 @@ from src.utils.config import Config
 from src.model.model import triplet_loss, calculate_similarity
 from src.utils.logger import logger
 from src.model.model_utils import save_model, get_model_path
-from torch.cuda.amp import GradScaler, autocast
+from torch.cuda.amp import GradScaler
+from torch.amp import autocast
 from tqdm import tqdm
 
 def train_triplet(model, train_loader, optimizer, num_epochs, device):
@@ -24,7 +25,7 @@ def train_triplet(model, train_loader, optimizer, num_epochs, device):
                 negative_ids = batch['negative_ids'].to(device)
                 negative_mask = batch['negative_mask'].to(device)
 
-                with autocast():
+                with autocast(device_type='cuda', dtype=torch.float16):
                     anchor_embed, positive_embed, negative_embed = model(
                         anchor_ids, anchor_mask, 
                         positive_ids, positive_mask, 
