@@ -112,7 +112,40 @@ literary-style-analysis/
 
 ## Usage
 
-The main script for running the literary style analysis pipeline is `scripts/run_training.py`. This script now supports running different stages of the pipeline separately or together.
+### Preparing Your Dataset
+
+1. Download a dataset of literary texts. For example, you can use the "Livres en Français" dataset from Kaggle:
+   https://www.kaggle.com/datasets/cedriclacrambe/livres-en-francais
+
+2. Create a directory structure in the `data/raw` folder that follows this pattern:
+   ```
+   data/
+   └── raw/
+       ├── author1/
+       │   ├── book1.txt
+       │   ├── book2.txt
+       │   └── ...
+       ├── author2/
+       │   ├── book1.txt
+       │   ├── book2.txt
+       │   └── ...
+       └── ...
+   ```
+
+   Note: You can use the "Livres en Français" (https://www.kaggle.com/datasets/cedriclacrambe/livres-en-francais) dataset which is already provided in this format.
+
+
+3. Ensure that each text file contains the full text of a single book.
+
+4. Update the `INPUT_DIRECTORY` in `src/utils/config.py` if necessary. By default, it should be set to:
+   ```python
+   INPUT_DIRECTORY = os.path.join(BASE_DIR, "data", "raw")
+   ```
+   If you've placed your data in a different location, update this path accordingly.
+
+5. (Optional) If you want to use only a subset of the data or have a different directory structure, you can modify the `process_file` function in `src/data/data_processing.py` to suit your needs.
+
+Once your dataset is prepared, you can proceed with the training pipeline.
 
 ### Training Pipeline
 
@@ -133,23 +166,33 @@ You can run these steps individually or combine them as needed. Here are some ex
 
 2. To create triplets:
    ```
-   python scripts/run_training.py --create_triplets 
+   python scripts/run_training.py --create_triplets
    ```
 
-3. To tokenize the triplet:
+3. To tokenize triplets:
    ```
-   python scripts/run_training.py  --tokenize_triplets
-   ```
-
-4. To train the model and display random triplet analysis:
-   ```
-   python scripts/run_training.py --train --display_random
+   python scripts/run_training.py --tokenize_triplets
    ```
 
-5. To run the entire pipeline:
+4. To train the model:
+   ```
+   python scripts/run_training.py --train
+   ```
+
+5. To display random triplet analysis:
+   ```
+   python scripts/run_training.py --display_random
+   ```
+
+6. To run the entire pipeline:
    ```
    python scripts/run_training.py --create_csv --create_triplets --tokenize_triplets --train --display_random
    ```
+
+You can also combine multiple steps in a single command. For example, to create triplets and then tokenize them:
+```
+python scripts/run_training.py --create_triplets --tokenize_triplets
+```
 
 ### Testing
 
