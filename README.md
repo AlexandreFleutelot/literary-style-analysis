@@ -8,8 +8,7 @@ This project implements a deep learning model for analyzing and comparing litera
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Training](#training)
-- [Testing](#testing)
+- [Training Pipeline](#training-pipeline)
 - [Configuration](#configuration)
 - [Contributing](#contributing)
 - [License](#license)
@@ -22,6 +21,7 @@ This project implements a deep learning model for analyzing and comparing litera
 - Training with triplet loss for style comparison
 - Evaluation of model performance
 - Similarity analysis between text samples
+- Flexible pipeline for data preparation and model training
 - Autonomous testing script for random triplet analysis and custom text comparison
 
 ## Project Structure
@@ -109,26 +109,51 @@ literary-style-analysis/
 4. Prepare your dataset:
    - Place your text files in the `data/raw` directory
    - Update the `INPUT_DIRECTORY` in `src/utils/config.py` if necessary
-   - Run the data preparation script:
-     ```
-     python -m src.data.data_processing
-     ```
 
-Now you're ready to start training your model!
+## Usage
 
-## Training
+The main script for running the literary style analysis pipeline is `scripts/run_training.py`. This script now supports running different stages of the pipeline separately or together.
 
-The training process can be initiated by running:
+### Training Pipeline
 
-```
-python scripts/run_training.py
-```
+The training pipeline consists of the following steps:
 
-This script handles data loading, model initialization, and the training loop. You can modify training parameters in `src/utils/config.py`.
+1. Create dataset CSV
+2. Generate triplets
+3. Tokenize triplets
+4. Train the model
+5. (Optional) Display random triplet analysis
 
-## Testing
+You can run these steps individually or combine them as needed. Here are some example usages:
 
-The project includes an autonomous testing script for evaluating the model. To use it:
+1. To create the CSV file only:
+   ```
+   python scripts/run_training.py --create_csv
+   ```
+
+2. To create triplets:
+   ```
+   python scripts/run_training.py --create_triplets 
+   ```
+
+3. To tokenize the triplet:
+   ```
+   python scripts/run_training.py  --tokenize_triplets
+   ```
+
+4. To train the model and display random triplet analysis:
+   ```
+   python scripts/run_training.py --train --display_random
+   ```
+
+5. To run the entire pipeline:
+   ```
+   python scripts/run_training.py --create_csv --create_triplets --tokenize_triplets --train --display_random
+   ```
+
+### Testing
+
+You can use the testing script to evaluate the model on random triplets or compare custom texts:
 
 1. For random triplet analysis:
    ```

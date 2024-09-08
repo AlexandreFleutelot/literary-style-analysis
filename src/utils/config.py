@@ -11,23 +11,22 @@ class Config:
 
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     MODEL_NAME = "prajjwal1/bert-mini"  
-    NUM_FROZEN_LAYERS = 2
+    NUM_FROZEN_LAYERS = 0
     LEARNING_RATE = 2e-5
-    NUM_EPOCHS = 5
+    NUM_EPOCHS = 15
     MARGIN = 0.2
     BATCH_SIZE = 32
     MAX_LENGTH = 256
     TEST_SIZE = 0.2
 
     # Memory management
-    BATCH_SIZE = 16  # Reduced from 32
     GRADIENT_ACCUMULATION_STEPS = 4
-    USE_CPU_IF_OOM = False
+    USE_CPU_IF_OOM = True
 
     # Model saving parameters
     MODEL_SAVE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models')
     SAVE_INTERMEDIATE_MODELS = True
-    SAVE_INTERVAL = 1  # Save every N epochs
+    SAVE_INTERVAL = 1  
     
     # Dataset
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
