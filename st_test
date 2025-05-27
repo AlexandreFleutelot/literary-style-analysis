@@ -1,0 +1,242 @@
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import numpy as np
+
+# Configuration de la page
+st.set_page_config(
+    page_title="Analyse de Clusters",
+    page_icon="📊",
+    layout="wide"
+)
+
+# Titre principal
+st.title("📊 Analyse de Clusters et Descriptions")
+st.markdown("---")
+
+# Fonction pour charger les données (à adapter selon votre source)
+@st.cache_data
+def load_data():
+    """
+    Remplacez cette fonction par le chargement de vos vraies données
+    Par exemple : return pd.read_csv('votre_fichier.csv')
+    """
+    # Données d'exemple - remplacez par vos vraies données
+    np.random.seed(42)
+    n_rows = 1000
+    
+    data = {
+        'cluster_id': np.random.randint(1, 11, n_rows),
+        'description': [f"Description {i}" for i in range(n_rows)],
+        'niveau de confiance': np.random.uniform(0.1, 1.0, n_rows),
+        'groupe d assignation': np.random.choice(['Groupe A', 'Groupe B', 'Groupe C', 'Groupe D'], n_rows),
+        'type de ci': np.random.choice(['Type 1', 'Type 2', 'Type 3'], n_rows)
+    }
+    return pd.DataFrame(data)
+
+# Chargement des données
+df = load_data()
+
+# Sidebar pour les filtres
+st.sidebar.header("🔍 Filtres")
+
+# Filtre pour groupe d'assignation
+groupes_disponibles = ['All'] + sorted(df['groupe d assignation'].unique().tolist())
+groupe_selectionne = st.sidebar.selectbox(
+    "Groupe d'assignation:",
+    groupes_disponibles
+)
+
+# Filtre pour type de ci
+types_disponibles = ['All'] + sorted(df['type de ci'].unique().tolist())
+type_selectionne = st.sidebar.selectbox(
+    "Type de CI:",
+    types_disponibles
+)
+
+# Paramètre pour le top N
+st.sidebar.markdown("---")
+st.sidebar.header("⚙️ Paramètres")
+top_n = st.sidebar.slider(
+    "Nombre de descriptions par cluster (Top N):",
+    min_value=1,
+    max_value=10,
+    value=3
+)
+
+# Application des filtres
+df_filtre = df.copy()
+
+if groupe_selectionne != 'All':
+    df_filtre = df_filtre[df_filtre['groupe d assignation'] == groupe_selectionne]
+
+if type_selectionne != 'All':
+    df_filtre = df_filtre[df_filtre['type de ci'] == type_selectionne]
+
+# Vérification si des données restent après filtrage
+if df_filtre.empty:
+    st.warning("⚠️ Aucune donnée ne correspond aux filtres sélectionnés.")
+    st.stop()
+
+# Informations sur le filtrage
+st.info(f"📊 Données affichées : {len(df_filtre)} entrées sur {len(df)} total")
+
+# Section 1: Top N descriptions par cluster
+st.header(f"🏆 Top {top_n} descriptions les plus confiantes par cluster")
+
+# Calcul du top N par cluster
+top_descriptions = (df_filtre
+                   .sort_values(['cluster_id', 'niveau de confiance'], ascending=[True, False])
+                   .groupby('cluster_id')
+                   .head(top_n)
+                   .reset_index(drop=True))
+
+# Affichage de la table
+st.dataframe(
+    top_descriptions[['cluster_id', 'description', 'niveau de confiance', 'groupe d assignation', 'type de ci']],
+    use_container_width=True,
+    hide_index=True
+)
+
+# Section 2: Statistiques sur les clusters
+st.markdown("---")
+st.header("📈 Statistiques des Clusters")
+
+# Création de deux colonnes pour les métriques
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+    st.metric("Nombre de clusters", df_filtre['cluster_id'].nunique())
+
+with col2:
+    st.metric("Moyenne de confiance", f"{df_filtre['niveau de confiance'].mean():.3f}")
+
+with col3:
+    st.metric("Confiance max", f"{df_filtre['niveau de confiance'].max():.3f}")
+
+with col4:
+    st.metric("Confiance min", f"{df_filtre['niveau de confiance'].min():.3f}")
+
+# Graphiques
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("📊 Taille des clusters")
+    
+    # Calcul des tailles de clusters
+    cluster_sizes = df_filtre['cluster_id'].value_counts().sort_index()
+    
+    # Graphique en barres
+    fig_bar = px.bar(
+        x=cluster_sizes.index,
+        y=cluster_sizes.values,
+        labels={'x': 'Cluster ID', 'y': 'Nombre d\'éléments'},
+        title="Distribution des tailles de clusters"
+    )
+    fig_bar.update_layout(showlegend=False)
+    st.plotly_chart(fig_bar, use_container_width=True)
+
+with col2:
+    st.subheader("📊 Répartition des scores de confiance")
+    
+    # Histogramme des niveaux de confiance
+    fig_hist = px.histogram(
+        df_filtre,
+        x='niveau de confiance',
+        nbins=20,
+        title="Distribution des niveaux de confiance",
+        labels={'x': 'Niveau de confiance', 'y': 'Fréquence'}
+    )
+    st.plotly_chart(fig_hist, use_container_width=True)
+
+# Section 3: Analyse détaillée par cluster
+st.markdown("---")
+st.header("🔍 Analyse détaillée par cluster")
+
+# Box plot des niveaux de confiance par cluster
+fig_box = px.box(
+    df_filtre,
+    x='cluster_id',
+    y='niveau de confiance',
+    title="Distribution des niveaux de confiance par cluster"
+)
+fig_box.update_layout(
+    xaxis_title="Cluster ID",
+    yaxis_title="Niveau de confiance"
+)
+st.plotly_chart(fig_box, use_container_width=True)
+
+# Tableau de statistiques par cluster
+st.subheader("📋 Statistiques détaillées par cluster")
+
+stats_par_cluster = df_filtre.groupby('cluster_id').agg({
+    'niveau de confiance': ['count', 'mean', 'std', 'min', 'max'],
+    'description': 'count'
+}).round(3)
+
+# Renommer les colonnes pour plus de clarité
+stats_par_cluster.columns = ['Nb_éléments', 'Confiance_moy', 'Confiance_std', 'Confiance_min', 'Confiance_max', 'Total_descriptions']
+stats_par_cluster = stats_par_cluster.reset_index()
+
+st.dataframe(stats_par_cluster, use_container_width=True, hide_index=True)
+
+# Section 4: Analyse par groupe et type
+if len(df_filtre['groupe d assignation'].unique()) > 1 or len(df_filtre['type de ci'].unique()) > 1:
+    st.markdown("---")
+    st.header("🎯 Analyse par groupe et type")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if len(df_filtre['groupe d assignation'].unique()) > 1:
+            st.subheader("Répartition par groupe d'assignation")
+            groupe_counts = df_filtre['groupe d assignation'].value_counts()
+            fig_pie1 = px.pie(
+                values=groupe_counts.values,
+                names=groupe_counts.index,
+                title="Distribution par groupe d'assignation"
+            )
+            st.plotly_chart(fig_pie1, use_container_width=True)
+    
+    with col2:
+        if len(df_filtre['type de ci'].unique()) > 1:
+            st.subheader("Répartition par type de CI")
+            type_counts = df_filtre['type de ci'].value_counts()
+            fig_pie2 = px.pie(
+                values=type_counts.values,
+                names=type_counts.index,
+                title="Distribution par type de CI"
+            )
+            st.plotly_chart(fig_pie2, use_container_width=True)
+
+# Section 5: Export des données
+st.markdown("---")
+st.header("💾 Export des données")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    # Bouton pour télécharger les données filtrées
+    csv_filtre = df_filtre.to_csv(index=False)
+    st.download_button(
+        label="📥 Télécharger données filtrées (CSV)",
+        data=csv_filtre,
+        file_name=f"donnees_filtrees_{groupe_selectionne}_{type_selectionne}.csv",
+        mime="text/csv"
+    )
+
+with col2:
+    # Bouton pour télécharger le top N
+    csv_top = top_descriptions.to_csv(index=False)
+    st.download_button(
+        label=f"📥 Télécharger Top {top_n} descriptions (CSV)",
+        data=csv_top,
+        file_name=f"top_{top_n}_descriptions.csv",
+        mime="text/csv"
+    )
+
+# Footer
+st.markdown("---")
+st.markdown("*Application développée avec Streamlit pour l'analyse de clusters*")
